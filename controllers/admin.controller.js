@@ -105,6 +105,8 @@ exports.uploadGrades = async (req, res, next) => {
         score: studentReport.grade,
         attendance: { totalDays: JSON.stringify(totalDays), daysAbsent: JSON.stringify(daysAbsent) },
       };
+
+       console.log(recordData);
   
       let content;
       let record = await Record.findOne(await panda.encryptObject({ lrn, subject: subjectName.toLowerCase() }));
