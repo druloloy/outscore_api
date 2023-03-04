@@ -5,9 +5,9 @@
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 // remove console logs on prod
-if (process.env.NODE_ENV === 'production') {
-	console.log = () => {};
-}
+// if (process.env.NODE_ENV === 'production') {
+// 	console.log = () => {};
+// }
 
 
 
