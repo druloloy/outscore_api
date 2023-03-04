@@ -255,8 +255,7 @@ exports.addSubject = async (req, res, next) => {
 
 exports.removeSubject = async (req, res, next) => {
     try {
-        const { name } = req.body;
-
+        const { name } = req.query;
         const subjectExists = await Subject.findOne({
             name: name.toLowerCase()
         });
