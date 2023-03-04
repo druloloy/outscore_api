@@ -6,9 +6,13 @@ const pandaConfig = {
 }
 
 async function encrypt(data) {
-    const buffer = Buffer.from(data, 'utf8');
-    const encrypted = await panda.encrypt(buffer, pandaConfig);
-    return panda.bufferToBase64(encrypted);
+    try {
+        const buffer = Buffer.from(data, 'utf8');
+        const encrypted = await panda.encrypt(buffer, pandaConfig);
+        return panda.bufferToBase64(encrypted);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 async function decrypt(data) {
