@@ -103,7 +103,7 @@ exports.login  = async (req, res, next) => {
         res.cookie('access', access, {
             httpOnly: false,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             maxAge: tokenConfig.ACCESS.MAX_AGE
         });
 
