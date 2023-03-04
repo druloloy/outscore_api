@@ -26,7 +26,7 @@ app.use(cors({
 	origin: [
 		'http://localhost:3000',
 		'https://outscore-taguig.netlify.app',
-		'https://outscore-admin.netlify.app/'
+		'https://outscore-admin.netlify.app'
 	],
 	credentials: true,
 })); 
