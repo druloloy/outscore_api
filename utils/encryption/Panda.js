@@ -1,4 +1,4 @@
-const panda = require('panda-encryption').Panda;
+const panda = require('../panda-encryption/app').Panda;
 
 const pandaConfig = {
     key: process.env.PANDA_SECRET_KEY,
