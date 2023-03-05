@@ -97,8 +97,7 @@ exports.login  = async (req, res, next) => {
         student.identifier = createPlaceholder();
         await student.save();
         
-        const session = await student.generateRefreshToken();
-        const access = await student.generateAccessToken();
+        const refresh = await student.generateRefreshToken();
 
         res.status(200).json({
             content: {

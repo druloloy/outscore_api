@@ -33,25 +33,10 @@ exports.login = async (req, res) => {
             if (!isMatch) throw new Exception("Invalid username/password.", 401);
 
             const refresh = await admin.generateRefreshToken();
-            const access = admin.generateAccessToken();
-
-            res.cookie('access', access, {
-                httpOnly: false,
-                secure: true,
-                sameSite: 'lax',
-                maxAge: tokenConfig.ACCESS.MAX_AGE
-            });
-    
-            res.cookie('refresh', refresh, {
-                httpOnly: true,
-                secure: true,
-                maxAge: tokenConfig.REFRESH.MAX_AGE,
-                sameSite: 'lax',
-                signed: true
-            });
 
             res.status(200).json({
-                message: 'Login successful'
+                message: 'Login successful',
+                token: refresh
             });
         });
     } catch (error) {
