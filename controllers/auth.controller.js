@@ -12,7 +12,7 @@ exports.getStudentAccess = async (req, res, next) => {
             return next(new Exception('Refresh token not found.', 400));
         }
 
-        const { id } = verify(refresh, tokenConfig.REFRESH.SECRET);
+        const { id } = verify(refreshToken, tokenConfig.REFRESH.SECRET);
         
         const studentSession = await StudentSession.findById(id);
 
@@ -45,7 +45,7 @@ exports.getAdminAccess = async (req, res, next) => {
             return next(new Exception('Refresh token not found.', 400));
         }
 
-        const {id} = verify(refresh, tokenConfig.REFRESH.SECRET);
+        const {id} = verify(refreshToken, tokenConfig.REFRESH.SECRET);
 
         const admin = await Admin.findById(id).select('-password -__v');
     
