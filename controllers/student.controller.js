@@ -103,7 +103,7 @@ exports.login  = async (req, res, next) => {
         res.cookie('access', access, {
             httpOnly: false,
             secure: true,
-            sameSite: 'none',
+            sameSite: 'lax',
             maxAge: tokenConfig.ACCESS.MAX_AGE
         });
 
@@ -111,7 +111,7 @@ exports.login  = async (req, res, next) => {
             httpOnly: true,
             secure: true,
             maxAge: tokenConfig.REFRESH.MAX_AGE,
-            sameSite: 'none',
+            sameSite: 'lax',
             signed: true
         });
 
