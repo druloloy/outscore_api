@@ -40,7 +40,6 @@ exports.getStudentAccess = async (req, res, next) => {
 exports.getAdminAccess = async (req, res, next) => {
     try {
         const { refreshToken } = req.body;
-        console.log('refreshToken',refresh)
         if(!refreshToken){
             return next(new Exception('Refresh token not found.', 400));
         }
