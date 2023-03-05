@@ -100,27 +100,13 @@ exports.login  = async (req, res, next) => {
         const session = await student.generateRefreshToken();
         const access = await student.generateAccessToken();
 
-        res.cookie('access', access, {
-            httpOnly: false,
-            secure: true,
-            sameSite: 'lax',
-            maxAge: tokenConfig.ACCESS.MAX_AGE
-        });
-
-        res.cookie('refresh', session, {
-            httpOnly: true,
-            secure: true,
-            maxAge: tokenConfig.REFRESH.MAX_AGE,
-            sameSite: 'lax',
-            signed: true
-        });
-
         res.status(200).json({
             content: {
                 id: student._id,
                 lrn: student.lrn,
                 name: `${student.firstName} ${student.lastName}`
             },
+            token: refresh,
             message: 'Login successful.'
         });
     } catch (error) {

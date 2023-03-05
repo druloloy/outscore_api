@@ -5,9 +5,15 @@ const { verifyAccessToken } = require("./token");
 
 exports.studentAuth = async (req, res, next) => {
     try {
-        const token = req.cookies.access; // access token
+        const headers = req.headers;
+        if(!headers.authorization){
+            return res.status(401).json({
+                message: 'Authentication error'
+            });
+        }
 
-        console.log(token)
+        const token = headers.authorization.split(' ')[1];
+        
         if (!token) {
             return res.status(401).json({
                 message: 'Authentication error'
@@ -29,8 +35,14 @@ exports.studentAuth = async (req, res, next) => {
 
 exports.adminAuth = async (req, res, next) => {     
     try {
-        const token = req.cookies.access; // access token
-        console.log(token)
+        const headers = req.headers;
+        if(!headers.authorization){
+            return res.status(401).json({
+                message: 'Authentication error'
+            });
+        }
+
+        const token = headers.authorization.split(' ')[1];
         if (!token) {
             return res.status(401).json({
                 message: 'Authentication error'

@@ -7,8 +7,7 @@ const StudentSession = require('../models/StudentSession.model');
 
 exports.getStudentAccess = async (req, res, next) => {
     try {
-        const { refresh } = req.signedCookies;
-        console.log('refreshToken',refresh)
+        const { refreshToken } = req.body;
         if (!refresh) {
             return next(new Exception('Refresh token not found.', 400));
         }
@@ -29,15 +28,8 @@ exports.getStudentAccess = async (req, res, next) => {
 
         const access = await student.generateAccessToken();
 
-        res.cookie('access', access, {
-            httpOnly: false,
-            secure: true,
-            sameSite: 'lax',
-            maxAge: tokenConfig.ACCESS.MAX_AGE
-        });
-
         res.status(200).json({
-            content: null,
+            token: access,
             message: 'Access token refreshed successfully.'
         });
     } catch (error) {
@@ -47,7 +39,7 @@ exports.getStudentAccess = async (req, res, next) => {
 
 exports.getAdminAccess = async (req, res, next) => {
     try {
-        const {refresh} = req.signedCookies;
+        const { refreshToken } = req.body;
         console.log('refreshToken',refresh)
         if(!refresh){
             return next(new Exception('Refresh token not found.', 400));
@@ -63,18 +55,10 @@ exports.getAdminAccess = async (req, res, next) => {
 
         const access = await admin.generateAccessToken();
 
-        res.cookie('access', access, {
-            httpOnly: false,
-            secure: true,
-            sameSite: 'lax',
-            maxAge: tokenConfig.ACCESS.MAX_AGE
-        });
-
         res.status(200).json({
-            content: null,
+            token: access,
             message: 'Access token refreshed successfully.'
         });
-
     } catch (error) {
         next(error)
     }
