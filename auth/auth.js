@@ -6,6 +6,8 @@ const { verifyAccessToken } = require("./token");
 exports.studentAuth = async (req, res, next) => {
     try {
         const token = req.cookies.access; // access token
+
+        console.log(token)
         if (!token) next(new Exception('Authentication error', 401));
         const decoded = verifyAccessToken(token);
         if (!decoded) next(new Exception('Authentication error', 401));
@@ -24,6 +26,7 @@ exports.studentAuth = async (req, res, next) => {
 exports.adminAuth = async (req, res, next) => {     
     try {
         const token = req.cookies.access; // access token
+        console.log(token)
         if (!token) {
             return res.status(401).json({
                 message: 'Authentication error'

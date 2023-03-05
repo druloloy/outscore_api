@@ -8,7 +8,7 @@ const StudentSession = require('../models/StudentSession.model');
 exports.getStudentAccess = async (req, res, next) => {
     try {
         const { refresh } = req.signedCookies;
-        
+        console.log('refreshToken',refresh)
         if (!refresh) {
             return next(new Exception('Refresh token not found.', 400));
         }
@@ -48,7 +48,7 @@ exports.getStudentAccess = async (req, res, next) => {
 exports.getAdminAccess = async (req, res, next) => {
     try {
         const {refresh} = req.signedCookies;
-
+        console.log('refreshToken',refresh)
         if(!refresh){
             return next(new Exception('Refresh token not found.', 400));
         }
