@@ -13,15 +13,17 @@ const StudentSessionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    expires: {
+    expiresAt: {
         type: Date,
-        index: { expires: tokenConfig.REFRESH.EXPIRES_IN },
+        required: true,
+        default: new Date(Date.now() + tokenConfig.REFRESH.MAX_AGE),
+        index: { expires: tokenConfig.REFRESH.MAX_AGE }
     }
 },
 {
     _id: false,
     id: false,
-    timestamps: false
+    timestamps: true
 });
 
 module.exports = mongoose.model('StudentSession', StudentSessionSchema);

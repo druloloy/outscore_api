@@ -8,7 +8,11 @@ exports.studentAuth = async (req, res, next) => {
         const token = req.cookies.access; // access token
 
         console.log(token)
-        if (!token) next(new Exception('Authentication error', 401));
+        if (!token) {
+            return res.status(401).json({
+                message: 'Authentication error'
+            });
+        }
         const decoded = verifyAccessToken(token);
         if (!decoded) next(new Exception('Authentication error', 401));
 
