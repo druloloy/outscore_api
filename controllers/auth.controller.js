@@ -8,7 +8,7 @@ const StudentSession = require('../models/StudentSession.model');
 exports.getStudentAccess = async (req, res, next) => {
     try {
         const { refreshToken } = req.body;
-        if (!refresh) {
+        if (!refreshToken) {
             return next(new Exception('Refresh token not found.', 400));
         }
 
@@ -41,7 +41,7 @@ exports.getAdminAccess = async (req, res, next) => {
     try {
         const { refreshToken } = req.body;
         console.log('refreshToken',refresh)
-        if(!refresh){
+        if(!refreshToken){
             return next(new Exception('Refresh token not found.', 400));
         }
 
