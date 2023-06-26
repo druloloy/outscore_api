@@ -19,10 +19,10 @@ class ParserFactory{
         return this;
     }
 
-    static async parse(){
+    static async parse(left_to_right = false){
         const parsed = await this.parser.parse();
         this.result = new ResultObject(parsed);
-        return this.result.parse();
+        return this.result.parse(left_to_right);
     }
 
     static _getShortName(type, option){

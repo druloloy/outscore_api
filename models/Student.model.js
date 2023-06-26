@@ -39,7 +39,16 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
-    }
+    },
+    profilePicture: {
+        type: String,
+        required: false,
+        default:`https://api.dicebear.com/6.x/bottts/png?seed=${Math.random()}`
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
 });
 
 StudentSchema.pre('save', function(next) {

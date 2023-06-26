@@ -14,6 +14,7 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const useragent = require('express-useragent');
 const errorHandler = require('./middlewares/errorHandler');
 const Dictionary = require('./utils/dictionary/phraser');
 
@@ -21,10 +22,14 @@ const PORT = process.env.PORT || 5000;
 
 // init express
 const app = express();
+app.use(useragent.express()); // to handle useragent info in req.useragent
+app.set('trust proxy', true); // to handle ip address in req.ip
 app.use(express.json()); // to handle api calls responses in json format
 app.use(cors({
 	origin: [
+		'*',
 		'http://localhost:3000',
+		'http://localhost:3001',
 		'https://outscore-taguig.netlify.app',
 		'https://outscore-admin.netlify.app'
 	],
@@ -35,6 +40,9 @@ app.use(cookieParser(process.env.COOKIE_SECRET, require('./cookie.config')));
 
 // init Dictionary
 new Dictionary();
+
+// expose storage/profiles
+app.use('/storage/profiles', express.static('storage/profiles'));
 
 // database
 require('./database/connection').connect();

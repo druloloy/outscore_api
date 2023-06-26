@@ -52,6 +52,12 @@ exports.getAdminAccess = async (req, res, next) => {
             return next(new Exception('Admin not found.', 400));
         }
 
+        // check if refresh token is present in admin's refreshTokens array
+        const refreshTokens = admin.refreshTokens.map(item => item.refreshToken);
+        if(!refreshTokens.includes(refreshToken)){
+            return next(new Exception('Invalid refresh token.', 400));
+        }
+
         const access = await admin.generateAccessToken();
 
         res.status(200).json({

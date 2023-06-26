@@ -12,7 +12,7 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    refreshTokens: [String]
+    refreshTokens: [Object]
 });
 
 AdminSchema.pre('save', function(next) {
@@ -35,7 +35,7 @@ AdminSchema.methods.comparePassword = function(candidatePassword, cb) {
     });
 };
 
-AdminSchema.methods.generateRefreshToken = async function() {
+AdminSchema.methods.generateRefreshToken = async function(req) {
     try {
         const admin = this;
         const payload = {
@@ -43,10 +43,20 @@ AdminSchema.methods.generateRefreshToken = async function() {
             username: admin.username
         }
         const refreshToken = createRefreshToken(payload);
-        admin.refreshTokens.push(refreshToken);
+        const ip = req.ip;
+        const userAgent = req.useragent; 
+        const os = userAgent.os; 
+        admin.refreshTokens.push({
+            id: new mongoose.Types.ObjectId(),
+            ip,
+            os,
+            refreshToken,
+            createdAt: Date.now()
+        });
         await admin.save();
         return refreshToken;
     } catch (error) {
+        console.log(error);
         throw new Exception('Error generating token.', 500);
     }
 }
@@ -64,6 +74,5 @@ AdminSchema.methods.generateAccessToken = function() {
         throw new Exception('Error generating token.', 500);
     }
 }
-
 
 module.exports = mongoose.model('Admin', AdminSchema);

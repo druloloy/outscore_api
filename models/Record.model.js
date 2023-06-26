@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const GradeSchema = require('./Grading.schema');
+const Student = require('./Student.model');
+const panda = require('../utils/encryption/Panda');
+const Exception = require('../utils/Exception');
 
 const RecordSchema = new mongoose.Schema({
     lrn: {
@@ -21,6 +24,10 @@ const RecordSchema = new mongoose.Schema({
     teacherInCharge: {
         type: String,
         required: true,
+    },
+    sy: {
+        type: String,
+        required: true
     },
     grades: {
         type: [GradeSchema],

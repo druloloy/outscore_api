@@ -48,6 +48,7 @@ exports.adminAuth = async (req, res, next) => {
                 message: 'Authentication error'
             });
         }
+        
         const decoded = verifyAccessToken(token);
         const user = await (Admin.findById(decoded.id)).select('-password -__v');
         if (!user) next(new Exception('Authentication error', 401));
