@@ -6,6 +6,8 @@ const Record = require('../models/Record.model');
 const Subject = require('../models/Subject.model');
 const Student = require('../models/Student.model');
 
+const defaultSY = require('../utils/defaultSY');
+
 const panda = require('../utils/encryption/Panda');
 const tokenConfig = require('../token.config');
 const StudentSession = require('../models/StudentSession.model');
@@ -205,7 +207,7 @@ exports.uploadGrades = async (req, res, next) => {
         } = await parser.parse(true);
 
         const subject = await Subject.findOne({
-            name: studentReport.subject.toLowerCase()
+            name: studentReport.subject.toUpperCase()
         });
         if (!subject) {
             return next(new Exception('Subject does not exist.', 400));
@@ -225,7 +227,7 @@ exports.uploadGrades = async (req, res, next) => {
             lrn,
             level: studentReport.level,
             section: studentReport.section,
-            subject: subjectName.toLowerCase(),
+            subject: subjectName.toUpperCase(),
             teacherInCharge: studentReport.teacherIncharge,
             sy: studentReport.schoolYear,
         };
@@ -241,7 +243,7 @@ exports.uploadGrades = async (req, res, next) => {
         let content;
         let record = await Record.findOne(await panda.encryptObject({
             lrn,
-            subject: subjectName.toLowerCase(),
+            subject: subjectName.toUpperCase(),
             sy: studentReport.schoolYear,
         }));
         if (record) {
@@ -267,75 +269,127 @@ exports.uploadGrades = async (req, res, next) => {
 
 exports.bulkUploadGrades = async (req, res, next) => {
     try {
+        const { files } = req; 
 
-        const {
-            files
-        } = req; // Use the files array instead of file
         const content = [];
 
+        const failed = [];
+
         for (const f of files) {
-            const parser = SheetParser.createParser(f.mimetype).loadFileBuffer(f.buffer);
-            const {
-                studentGradeReport: studentReport,
-                totalDays,
-                daysAbsent
-            } = await parser.parse(true);
+            const parser = SheetParser
+                .createParser(f.mimetype)
+                .loadFileBuffer(f.buffer);
+            
+            const rows = await parser.parse(false);
 
-            const subject = await Subject.findOne({
-                name: studentReport.subject.toLowerCase()
-            });
-            if (!subject) {
-                return next(new Exception('Subject does not exist.', 400));
-            }
+            for (const row in rows){
+                const {
+                    lrn,
+                    studentFirstName,
+                    studentMiddleName,
+                    studentLastName,
+                    section,
+                    level,
+                    grade,
+                    gradingPeriod,
+                    subject,
+                    teacherIncharge,
+                    schoolYear,
+                    attendanceDaysPresent,
+                    attendanceExcusedAbsences,
+                    attendanceUnexcusedAbsences,
+                } = rows[row];
 
-            const {
-                lrn,
-                subject: subjectName
-            } = studentReport;
+                const recordData = {    
+                    lrn,    
+                    level,
+                    section: section.toUpperCase(),
+                    subject: subject.toUpperCase(),
+                    teacherInCharge: teacherIncharge,
+                    sy: schoolYear,
+                };
 
-            if (!lrn.match(/^\d{12}$/))
-                return res.status(400).json({
-                    message: 'LRN must be 12 digits long'
-                });
+                // data validation
+                if (!lrn.match(/^\d{12}$/)) {
+                    failed.push({
+                        rowNumber: parseInt(row)+1,
+                        reason: 'LRN must be 12 digits long.',
+                    });
+                    continue;
+                }
+                // 2 digit integer or 2 digit with decimal
+                if (grade > 100 || grade < 60) {
+                    failed.push({
+                        rowNumber: parseInt(row)+1,
+                        reason: 'Grade must be between 60 and 100.',
+                    });
+                    continue;
+                }
 
-            const recordData = {
-                lrn,
-                level: studentReport.level,
-                section: studentReport.section,
-                subject: subjectName.toLowerCase(),
-                teacherInCharge: studentReport.teacherIncharge,
-                sy: studentReport.schoolYear
-            };
-            const grades = {
-                period: studentReport.gradingPeriod,
-                score: studentReport.grade,
-                attendance: {
-                    totalDays: JSON.stringify(totalDays),
-                    daysAbsent: JSON.stringify(daysAbsent)
-                },
-            };
+                if (!gradingPeriod.match(/^\d{1}$/)) {
+                    failed.push({
+                        rowNumber: parseInt(row)+1,
+                        reason: 'Grading period must be 1 digit long.',
+                    });
+                    continue;
+                }
 
-            let record = await Record.findOne(await panda.encryptObject({
-                lrn,
-                subject: subjectName.toLowerCase(),
-                sy: studentReport.schoolYear
-            }));
-            if (record) {
-                record.addGrade(await panda.encryptObject(grades));
+                if (!level.match(/^\d{1,2}$/)) {
+                    failed.push({
+                        rowNumber: parseInt(row)+1,
+                        reason: 'Level must be 1 or 2 digits long.',
+                    });
+                    continue;
+                }
+
+                const enc_record = await panda.encryptObject(recordData);
+                
+                const grades = {
+                    period: gradingPeriod,
+                    score: grade,
+                    attendance: {
+                        daysPresent: attendanceDaysPresent,
+                        excusedAbsences: attendanceExcusedAbsences,
+                        unexcusedAbsences: attendanceUnexcusedAbsences
+                    },
+                }
+                const enc_grades = await panda.encryptObject(grades);
+                
+                let record = await Record.findOne(enc_record);
+
+                
+                if (record) {
+                    // update grades if not same grading period
+                    if (!record.grades.find(g => g.period === enc_grades.period)) {
+                        record.addGrade(enc_grades);
+                        await record.save();
+                        content.push(record);
+                        continue;
+                    }
+
+                    failed.push({
+                        rowNumber: parseInt(row)+1,
+                        reason: 'Record already exists.',
+                    });
+                    continue;
+                } 
+                
+                record = new Record(enc_record);
+                record.addGrade(enc_grades);
                 await record.save();
-                content.push(record); // Push the record to the array of content
-            } else {
-                record = new Record(await panda.encryptObject(recordData));
-                record.addGrade(await panda.encryptObject(grades));
-                await record.save();
-                content.push(record); // Push the record to the array of content
+                content.push(record);
+                
             }
         }
 
-        return res.status(200).json({
-            content,
-            message: 'Grades uploaded successfully'
-        }); // Return the array of content
+        res.status(200).json({
+            content: {
+                success_count: content.length,
+                failed_count: failed.length,
+                failed,
+                success: content
+            }
+        });
     } catch (error) {
         console.log(error);
         next(error);
@@ -354,13 +408,15 @@ exports.updateGrades = async (req, res, next) => {
 
         const {sy} = req.query;
 
-        const record = await Record.findOne(await panda.encryptObject({
+        const enc_body = await panda.encryptObject({
             lrn,
-            subject: subject.toLowerCase(),
-            section,
+            section: section.toUpperCase(),
             level,
+            subject: subject.toUpperCase(),
             sy
-        }));
+        });
+
+        const record = await Record.findOne(enc_body);
 
         if (!record) throw new Exception('Record not found.', 404);
 
@@ -419,8 +475,9 @@ exports.getGrades = async (req, res, next) => {
                 const grade = record.grades[j];
                 grade.period = await panda.decrypt(grade.period);
                 grade.score = await panda.decrypt(grade.score);
-                grade.attendance.totalDays = await panda.decrypt(grade.attendance.totalDays);
-                grade.attendance.daysAbsent = await panda.decrypt(grade.attendance.daysAbsent);
+                grade.attendance.daysPresent = await panda.decrypt(grade.attendance.daysPresent);
+                grade.attendance.excusedAbsences = await panda.decrypt(grade.attendance.excusedAbsences);
+                grade.attendance.unexcusedAbsences = await panda.decrypt(grade.attendance.unexcusedAbsences);
             }
             records[i] = Object.assign({}, record[i], record);
         }
@@ -518,7 +575,7 @@ exports.addSubject = async (req, res, next) => {
             name
         } = req.body;
         const subject = new Subject({
-            name: name.toLowerCase()
+            name: name.toUpperCase()
         });
         await subject.save();
         res.status(200).json({
@@ -624,7 +681,7 @@ exports.removeSubject = async (req, res, next) => {
             name
         } = req.query;
         const subjectExists = await Subject.findOne({
-            name: name.toLowerCase()
+            name: name.toUpperCase()
         });
 
         if (!subjectExists) {
@@ -632,7 +689,7 @@ exports.removeSubject = async (req, res, next) => {
         }
 
         await Subject.deleteOne({
-            name: name.toLowerCase()
+            name: name.toUpperCase()
         });
 
         res.status(200).json({

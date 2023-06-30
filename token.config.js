@@ -1,7 +1,7 @@
 module.exports = {
     ACCESS: {
         SECRET: process.env.ACCESS_TOKEN_SECRET,
-        EXPIRES_IN: '15m',
+        EXPIRES_IN: '7h',
         MAX_AGE: ((60 * 15) * 1000), // 15m
     },
     REFRESH: {

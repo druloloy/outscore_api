@@ -33,8 +33,9 @@ class ResultObject {
         while (index < data.length) {
             // first row is header, it will be used as key
             const values = Object.values(data[index]);
+
             const keys = Object.keys(headerObj);
-            const newObj = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+            const newObj = Object.fromEntries(keys.map((key, i) => [key, values[i] || ""]));
 
             object[index - 1] = newObj;
             index++;

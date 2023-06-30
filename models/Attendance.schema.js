@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 
 const AttendanceSchema = new mongoose.Schema({
-    daysAbsent: {
+    daysPresent: {
         type: String,
     },
-    totalDays: {
+    excusedAbsences: {
         type: String,
     },
+    unexcusedAbsences: {
+        type: String,
+    }
 },{
-    _id: false
+    _id: false,
+    timestamps: true
 });
 
 module.exports = AttendanceSchema;

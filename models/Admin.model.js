@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { createAccessToken, createRefreshToken } = require('../auth/token');
 const Exception = require('../utils/Exception');
+const RefreshTokenSchema = require('./RefreshToken.schema');
 const AdminSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -12,7 +13,10 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    refreshTokens: [Object]
+    refreshTokens: {
+        type: [RefreshTokenSchema],
+        default: []
+    }
 });
 
 AdminSchema.pre('save', function(next) {

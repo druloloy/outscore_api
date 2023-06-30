@@ -1,19 +1,20 @@
+const tokenConfig = require('../token.config');
 const {sign, verify, decode} = require('jsonwebtoken')
 
 exports.createAccessToken = (payload) => {
-    return sign(payload, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
+    return sign(payload, tokenConfig.ACCESS.SECRET, {expiresIn: tokenConfig.ACCESS.EXPIRES_IN})
 }
 
 exports.createRefreshToken = (payload) => {
-    return sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '7d'})
+    return sign(payload, tokenConfig.REFRESH.SECRET, {expiresIn: tokenConfig.REFRESH.EXPIRES_IN})
 }
 
 exports.verifyAccessToken = (token) => {
-    return verify(token, process.env.ACCESS_TOKEN_SECRET)
+    return verify(token, tokenConfig.ACCESS.SECRET)
 }
 
 exports.verifyRefreshToken = (token) => {
-    return verify(token, process.env.REFRESH_TOKEN_SECRET)
+    return verify(token, tokenConfig.REFRESH.SECRET)
 }
 
 // students only
@@ -29,5 +30,5 @@ exports.createStudentAccessToken = (token) => {
         name: decoded.name
     }
     // create access token
-    return sign(payload, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
+    return sign(payload, tokenConfig.ACCESS.SECRET, {expiresIn: tokenConfig.ACCESS.EXPIRES_IN})
 }

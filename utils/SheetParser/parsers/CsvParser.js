@@ -14,7 +14,7 @@ class CsvParser {
             csv2json(option)
                 .fromString(file.toString())
                 .then((jsonObj)=>{
-                    resolve(this.#_removeEmptyObjectKeys(jsonObj));
+                    resolve(jsonObj);
                 })
                 .catch((err)=>{
                     reject(new ParserError(err.message));

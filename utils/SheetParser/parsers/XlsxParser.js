@@ -11,7 +11,9 @@ class XlsxParser{
             const file = this.fileBuffer;
             const result = excel2json({
                 source: file,
+                includeEmptyCells: true
             });
+
             resolve(result[Object.keys(result)[0]]);
             reject(new ParserError('Invalid file format'));
         })
