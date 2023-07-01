@@ -177,8 +177,9 @@ exports.getGrades = async (req, res, next) => {
             const grade = record.grades[j];
             grade.period = await panda.decrypt(grade.period);
             grade.score = await panda.decrypt(grade.score);
-            grade.attendance.totalDays = await panda.decrypt(grade.attendance.totalDays);
-            grade.attendance.daysAbsent =await panda.decrypt(grade.attendance.daysAbsent);
+            grade.attendance.daysPresent = await panda.decrypt(grade.attendance.daysPresent);
+            grade.attendance.excusedAbsences = await panda.decrypt(grade.attendance.excusedAbsences);
+            grade.attendance.unexcusedAbsences = await panda.decrypt(grade.attendance.unexcusedAbsences);
         }
 
         records[i] = Object.assign({}, record[i], record);
